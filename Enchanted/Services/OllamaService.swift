@@ -14,12 +14,12 @@ class OllamaService: @unchecked Sendable {
     var ollamaKit: OllamaKit
     
     init() {
-        ollamaKit = OllamaKit(baseURL: URL(string: "http://localhost:11434")!)
+        ollamaKit = OllamaKit(baseURL: URL(string: "http://172.16.10.13:11434")!)
         initEndpoint()
     }
     
     func initEndpoint(url: String? = nil, bearerToken: String? = "okki") {
-        let defaultUrl = "http://localhost:11434"
+        let defaultUrl = "http://172.16.10.13:11434"
         let localStorageUrl = UserDefaults.standard.string(forKey: "ollamaUri")
         let bearerToken = UserDefaults.standard.string(forKey: "ollamaBearerToken")
         if var ollamaUrl = [localStorageUrl, defaultUrl].compactMap({$0}).filter({$0.count > 0}).first {
