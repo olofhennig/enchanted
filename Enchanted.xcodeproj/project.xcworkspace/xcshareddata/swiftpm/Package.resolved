@@ -1,5 +1,5 @@
 {
-  "originHash" : "6b50cfa02d4bf895641059b1849b6511c22d9d977d28d59a759075bbc4840fa2",
+  "originHash" : "10dccef51acfe88009670694cc98afe2fc4447c21eb76f62a65aa1f260365350",
   "pins" : [
     {
       "identity" : "activityindicatorview",
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Clipy/Sauce",
       "state" : {
-        "revision" : "8f8fabaa8509c1a653d6c2c3c87396a4c493d876",
-        "version" : "2.4.0"
+        "revision" : "df657bc1beba23ffd580953f183cd756b5bcd514",
+        "version" : "2.4.1"
       }
     },
     {
