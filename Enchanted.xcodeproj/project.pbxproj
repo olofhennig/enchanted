@@ -798,7 +798,7 @@
 				CODE_SIGN_ENTITLEMENTS = Enchanted/Enchanted.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 25;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Enchanted/Preview Content\"";
 				DEVELOPMENT_TEAM = JDDZ55DT74;
@@ -847,7 +847,7 @@
 				CODE_SIGN_ENTITLEMENTS = Enchanted/Enchanted.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 25;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Enchanted/Preview Content\"";
 				DEVELOPMENT_TEAM = 3BCK63PDZH;
