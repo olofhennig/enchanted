@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct Settings: View {
     var languageModelStore = LanguageModelStore.shared
@@ -19,8 +20,14 @@ struct Settings: View {
     @AppStorage("ollamaBearerToken") private var ollamaBearerToken: String = ""
     @AppStorage("appUserInitials") private var appUserInitials: String = ""
     @AppStorage("pingInterval") private var pingInterval: String = "5"
+    @AppStorage("voiceIdentifier") private var voiceIdentifier: String = ""
+    
+    @StateObject private var speechSynthesiser = SpeechSynthesizer.shared
     
     @Environment(\.presentationMode) var presentationMode
+    
+    private let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
+    @State private var cancellable: AnyCancellable?
     
     private func save() {
 #if os(iOS)
@@ -32,7 +39,7 @@ struct Settings: View {
         
         OllamaService.shared.initEndpoint(url: ollamaUri, bearerToken: ollamaBearerToken)
         Task {
-            await Haptics.shared.mediumTap()
+            Haptics.shared.mediumTap()
             try? await languageModelStore.loadModels()
         }
         presentationMode.wrappedValue.dismiss()
@@ -61,14 +68,28 @@ struct Settings: View {
             ollamaBearerToken: $ollamaBearerToken,
             appUserInitials: $appUserInitials,
             pingInterval: $pingInterval,
+            voiceIdentifier: $voiceIdentifier,
             save: save,
             checkServer: checkServer,
             deleteAllConversations: conversationStore.deleteAllConversations,
-            ollamaLangugeModels: languageModelStore.models
+            ollamaLangugeModels: languageModelStore.models,
+            voices: speechSynthesiser.voices
         )
         .frame(maxWidth: 700)
+        #if os(visionOS)
+        .frame(minWidth: 600, minHeight: 800)
+        #endif
         .onChange(of: defaultOllamaModel) { _, modelName in
             languageModelStore.setModel(modelName: modelName)
+        }
+        .onAppear {
+            /// refresh voices in the background
+            cancellable = timer.sink { _ in
+                speechSynthesiser.fetchVoices()
+            }
+        }
+        .onDisappear {
+            cancellable?.cancel()
         }
     }
 }

@@ -5,12 +5,11 @@
 //  Created by Augustinas Malinauskas on 18/12/2023.
 //
 
-#if os(iOS)
 import SwiftUI
 import AVFoundation
 
 struct RecordingView: View {
-    @StateObject var speechRecognizer: SpeechRecognizer
+    @StateObject var speechRecognizer: SpeechRecognizer = SpeechRecognizer()
     @Binding var isRecording: Bool
     var onComplete: (_ transcription: String) -> () = {_ in}
     
@@ -19,9 +18,7 @@ struct RecordingView: View {
             await speechRecognizer.userInit()
             await toggleTranscribing()
         }
-        #if os(iOS)
         Haptics.shared.mediumTap()
-        #endif
     }
     
     private func toggleTranscribing() async {
@@ -31,7 +28,7 @@ struct RecordingView: View {
             isRecording = false
         } else {
             speechRecognizer.resetTranscript()
-            speechRecognizer.startTranscribing()
+            speechRecognizer.startTranscribing(onUpdate: onComplete)
             isRecording = true
         }
     }
@@ -45,7 +42,7 @@ struct RecordingView: View {
                     Image(systemName: "square.fill")
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(Color.bgCustom)
+                        .foregroundColor(.white)
                         .frame(width: 8)
                 }
                 .clipShape(Circle())
@@ -58,6 +55,12 @@ struct RecordingView: View {
                     .foregroundStyle(Color(.systemGray))
             }
         }
+        .buttonStyle(PlainButtonStyle())
+        .onChange(of: isRecording) { oldValue, newValue in
+            if newValue == false {
+                speechRecognizer.stopTranscribing()
+            }
+        }
     }
 }
 
@@ -67,5 +70,3 @@ struct MeetingView_Previews: PreviewProvider {
         RecordingView(speechRecognizer: SpeechRecognizer(), isRecording: .constant(true))
     }
 }
-
-#endif
