@@ -14,7 +14,9 @@ import AppKit
 struct MessageListView: View {
     var messages: [MessageSD]
     var conversationState: ConversationState
+    var userInitials: String
     @Binding var editMessage: MessageSD?
+    @State private var messageSelected: MessageSD?
     
     func onEditMessageTap() -> (MessageSD) -> Void {
         return { message in
@@ -24,59 +26,68 @@ struct MessageListView: View {
     
     var body: some View {
         ScrollViewReader { scrollViewProxy in
-            List(messages, id:\.self) { message in
-                let userContextMenu = ContextMenu(menuItems: {
-                    Button(action: {Clipboard.shared.setString(message.content)}) {
-                        Label("Copy", systemImage: "doc.on.doc")
-                    }
+            ScrollView {
+                ForEach(messages) { message in
                     
-                    if message.role == "user" {
-                        Button(action: {
-                            withAnimation { editMessage = message }
-                        }) {
-                            Label("Edit", systemImage: "pencil")
+                    let contextMenu = ContextMenu(menuItems: {
+                        Button(action: {Clipboard.shared.setString(message.content)}) {
+                            Label("Copy", systemImage: "doc.on.doc")
                         }
-                    }
+                        
+#if os(iOS)
+                        Button(action: { messageSelected = message }) {
+                            Label("Select Text", systemImage: "selection.pin.in.out")
+                        }
+#endif
+                        
+                        if message.role == "user" {
+                            Button(action: {
+                                withAnimation { editMessage = message }
+                            }) {
+                                Label("Edit", systemImage: "pencil")
+                            }
+                        }
+                        
+                        if editMessage?.id == message.id {
+                            Button(action: {
+                                withAnimation { editMessage = nil }
+                            }) {
+                                Label("Unselect", systemImage: "pencil")
+                            }
+                        }
+                    })
                     
-                    if editMessage?.id == message.id {
-                        Button(action: {
-                            withAnimation { editMessage = nil }
-                        }) {
-                            Label("Unselect", systemImage: "pencil")
-                        }
-                    }
-                })
-                ChatMessageView(
-                    message: message,
-                    editMessage: $editMessage
-                )
-                .id(message.id)
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
-                .padding(.vertical, 10)
-                .contextMenu(userContextMenu)
-                .padding(.horizontal, 10)
-                .runningBorder(animated: message.id == editMessage?.id)
+                    ChatMessageView(
+                        message: message,
+                        showLoader: conversationState == .loading && messages.last == message,
+                        userInitials: userInitials,
+                        editMessage: $editMessage
+                    )
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .padding(.vertical, 10)
+                    .contextMenu(contextMenu)
+                    .padding(.horizontal, 10)
+                    .runningBorder(animated: message.id == editMessage?.id)
+                    .id(message)
+                }
             }
-            .scrollContentBackground(.hidden)
+            .textSelection(.enabled)
             .onAppear {
-                scrollToBottom(scrollViewProxy)
+                scrollViewProxy.scrollTo(messages.last, anchor: .bottom)
             }
-            .onChange(of: messages) {
-                scrollToBottom(scrollViewProxy)
+            .onChange(of: messages) { oldMessages, newMessages in
+                scrollViewProxy.scrollTo(messages.last, anchor: .bottom)
             }
             .onChange(of: messages.last?.content) {
-                scrollToBottom(scrollViewProxy)
+                scrollViewProxy.scrollTo(messages.last, anchor: .bottom)
             }
-            .listStyle(.inset)
-            .scrollIndicators(.never)
+#if os(iOS)
+            .sheet(item: $messageSelected) { message in
+                SelectTextSheet(message: message)
+            }
+#endif
         }
-        .scrollDismissesKeyboard(.interactively)
-    }
-    
-    private func scrollToBottom(_ proxy: ScrollViewProxy) {
-        guard messages.count > 0 else { return }
-        proxy.scrollTo(messages[messages.endIndex - 1].id, anchor: .bottom)
     }
 }
 
@@ -84,6 +95,7 @@ struct MessageListView: View {
     MessageListView(
         messages: MessageSD.sample,
         conversationState: .loading,
+        userInitials: "AM",
         editMessage: .constant(MessageSD.sample[0])
     )
 }

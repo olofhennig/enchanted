@@ -1,5 +1,5 @@
 {
-  "originHash" : "6b50cfa02d4bf895641059b1849b6511c22d9d977d28d59a759075bbc4840fa2",
+  "originHash" : "833fa47aa42a8385a50e6f20c5125e66acefe26c9777986dddce89968d1daceb",
   "pins" : [
     {
       "identity" : "activityindicatorview",
@@ -52,7 +52,7 @@
       "location" : "https://github.com/AugustDev/OllamaKit",
       "state" : {
         "branch" : "main",
-        "revision" : "487bbb54e2f7dc8ea09d8542e21899376c89602d"
+        "revision" : "0079411b4568dbc821c9e2589345d3f9b9538af4"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Clipy/Sauce",
       "state" : {
-        "revision" : "8f8fabaa8509c1a653d6c2c3c87396a4c493d876",
-        "version" : "2.4.0"
+        "revision" : "df657bc1beba23ffd580953f183cd756b5bcd514",
+        "version" : "2.4.1"
       }
     },
     {
@@ -94,10 +94,10 @@
     {
       "identity" : "swift-markdown-ui",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/gonzalezreal/swift-markdown-ui",
+      "location" : "https://github.com/AugustDev/swift-markdown-ui",
       "state" : {
-        "revision" : "ae799d015a5374708f7b4c85f3294c05f2a564e2",
-        "version" : "2.3.0"
+        "branch" : "main",
+        "revision" : "acb83e45394334a04ba0cf3487e4d07f4709eeb4"
       }
     },
     {
@@ -105,8 +105,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/twostraws/Vortex",
       "state" : {
-        "revision" : "3eabf0572fd37e943be64b9d2589f97f1999cb26",
-        "version" : "1.0.0"
+        "revision" : "bb48b128d3c13c68c68e83833c622eec9f6c701f",
+        "version" : "1.0.1"
       }
     },
     {

@@ -15,6 +15,8 @@ struct SettingsView: View {
     @Binding var colorScheme: AppColorScheme
     @Binding var defaultOllamModel: String
     @Binding var ollamaBearerToken: String
+    @Binding var appUserInitials: String
+    @Binding var pingInterval: String
     @State var ollamaStatus: Bool?
     var save: () -> ()
     var checkServer: () -> ()
@@ -67,11 +69,14 @@ struct SettingsView: View {
                         .autocapitalization(.none)
 #endif
                     
-                    TextField("System prompt", text: $systemPrompt, axis: .vertical)
-                        .lineLimit(5, reservesSpace: true)
-#if os(iOS)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-#endif
+                    VStack(alignment: .leading) {
+                        Text("System prompt")
+                        TextEditor(text: $systemPrompt)
+                            .font(.system(size: 13))
+                            .cornerRadius(4)
+                            .multilineTextAlignment(.leading)
+                            .frame(minHeight: 100)
+                    }
                     
                     Picker(selection: $defaultOllamModel) {
                         ForEach(ollamaLangugeModels, id:\.self) { model in
@@ -97,6 +102,9 @@ struct SettingsView: View {
     #if os(iOS)
                         .autocapitalization(.none)
     #endif
+                    TextField("Ping Interval (seconds)", text: $pingInterval)
+                        .disableAutocorrection(true)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                     
                     Section(header: Text("APP").font(.headline).padding(.top, 20)) {
                         
@@ -117,6 +125,14 @@ struct SettingsView: View {
                         Label("Appearance", systemImage: "sun.max")
                             .foregroundStyle(Color.label)
                     }
+
+                    TextField("Initials", text: $appUserInitials)
+                        .disableAutocorrection(true)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+#if os(iOS)
+                        .keyboardType(.URL)
+                        .autocapitalization(.none)
+#endif
                     
                     Button(action: {deleteConversationsDialog.toggle()}) {
                         HStack {
@@ -146,11 +162,13 @@ struct SettingsView: View {
 #Preview {
     SettingsView(
         ollamaUri: .constant(""),
-        systemPrompt: .constant(""),
+        systemPrompt: .constant("You are an intelligent assistant solving complex problems. You are an intelligent assistant solving complex problems. You are an intelligent assistant solving complex problems."),
         vibrations: .constant(true),
         colorScheme: .constant(.light),
         defaultOllamModel: .constant("llama2"),
         ollamaBearerToken: .constant("x"),
+        appUserInitials: .constant("AM"),
+        pingInterval: .constant("5"),
         save: {},
         checkServer: {},
         deleteAllConversations: {},

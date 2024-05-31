@@ -26,6 +26,8 @@ struct ChatView: View {
     var onSelectModel: @MainActor (_ model: LanguageModelSD?) -> ()
     var onConversationDelete: (_ conversation: ConversationSD) -> ()
     var onDeleteDailyConversations: (_ date: Date) -> ()
+    var userInitials: String
+    var copyChat: (_ json: Bool) -> ()
     
     @State private var message = ""
     @State private var editMessage: MessageSD?
@@ -34,6 +36,7 @@ struct ChatView: View {
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             SidebarView(
+                selectedConversation: selectedConversation,
                 conversations: conversations,
                 onConversationTap: onConversationTap,
                 onConversationDelete: onConversationDelete,
@@ -45,6 +48,7 @@ struct ChatView: View {
                     MessageListView(
                         messages: messages,
                         conversationState: conversationState,
+                        userInitials: userInitials, 
                         editMessage: $editMessage
                     )
                 } else {
@@ -76,7 +80,8 @@ struct ChatView: View {
                 modelsList: modelsList,
                 selectedModel: selectedModel,
                 onSelectModel: onSelectModel,
-                onNewConversationTap: onNewConversationTap
+                onNewConversationTap: onNewConversationTap, 
+                copyChat: copyChat
             )
         }
         .onChange(of: editMessage, initial: false) { _, newMessage in
@@ -104,7 +109,9 @@ struct ChatView: View {
         modelSupportsImages: true,
         selectedModel: LanguageModelSD.sample[0], onSelectModel: {_ in},
         onConversationDelete: {_ in},
-        onDeleteDailyConversations: {_ in}
+        onDeleteDailyConversations: {_ in},
+        userInitials: "AM",
+        copyChat: {_ in}
     )
 }
 #endif

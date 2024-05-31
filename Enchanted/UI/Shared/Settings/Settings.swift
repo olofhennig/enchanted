@@ -17,6 +17,8 @@ struct Settings: View {
     @AppStorage("colorScheme") private var colorScheme = AppColorScheme.system
     @AppStorage("defaultOllamaModel") private var defaultOllamaModel: String = ""
     @AppStorage("ollamaBearerToken") private var ollamaBearerToken: String = ""
+    @AppStorage("appUserInitials") private var appUserInitials: String = ""
+    @AppStorage("pingInterval") private var pingInterval: String = "5"
     
     @Environment(\.presentationMode) var presentationMode
     
@@ -57,11 +59,14 @@ struct Settings: View {
             colorScheme: $colorScheme,
             defaultOllamModel: $defaultOllamaModel, 
             ollamaBearerToken: $ollamaBearerToken,
+            appUserInitials: $appUserInitials,
+            pingInterval: $pingInterval,
             save: save,
             checkServer: checkServer,
-            deleteAllConversations: conversationStore.deleteAllConversations, 
+            deleteAllConversations: conversationStore.deleteAllConversations,
             ollamaLangugeModels: languageModelStore.models
         )
+        .frame(maxWidth: 700)
         .onChange(of: defaultOllamaModel) { _, modelName in
             languageModelStore.setModel(modelName: modelName)
         }

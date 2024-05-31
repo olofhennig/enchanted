@@ -7,11 +7,12 @@
 
 import SwiftUI
 
-struct Chat: View {
+struct Chat: View, Sendable {
     @State private var languageModelStore: LanguageModelStore
     @State private var conversationStore: ConversationStore
     @State private var appStore: AppStore
     @AppStorage("systemPrompt") private var systemPrompt: String = ""
+    @AppStorage("appUserInitials") private var userInitials: String = ""
     @AppStorage("defaultOllamaModel") private var defaultOllamaModel: String = ""
     @State var showMenu = false
     
@@ -53,12 +54,12 @@ struct Chat: View {
     }
     
     func onConversationTap(_ conversation: ConversationSD) {
-        withAnimation(.bouncy(duration: 0.3)) {
-            Task {
-                try await conversationStore.selectConversation(conversation)
-                await languageModelStore.setModel(model: conversation.model)
-                Haptics.shared.mediumTap()
-            }
+        Task {
+            try await conversationStore.selectConversation(conversation)
+            await languageModelStore.setModel(model: conversation.model)
+            Haptics.shared.mediumTap()
+        }
+        withAnimation {
             showMenu.toggle()
         }
     }
@@ -86,6 +87,39 @@ struct Chat: View {
             await Haptics.shared.mediumTap()
             try? await languageModelStore.loadModels()
         }
+        
+#if os(iOS)
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+#endif
+    }
+    
+    func copyChat(_ json: Bool) {
+        Task {
+            let messages = await ConversationStore.shared.messages
+            
+            if messages.count == 0 {
+                return
+            }
+            
+            if json {
+                let jsonArray = messages.map { message in
+                    return [
+                        "role": message.role,
+                        "content": message.content
+                    ]
+                }
+                let jsonEncoder = JSONEncoder()
+                jsonEncoder.outputFormatting = [.withoutEscapingSlashes]
+
+                if let jsonData = try? jsonEncoder.encode(jsonArray),
+                   let jsonString = String(data: jsonData, encoding: .utf8) {
+                    Clipboard.shared.setString(jsonString)
+                }
+            } else {
+                let body = messages.map{"\($0.role.capitalized): \($0.content)"}.joined(separator: "\n\n")
+                Clipboard.shared.setString(body)
+            }
+        }
     }
     
     var body: some View {
@@ -107,11 +141,14 @@ struct Chat: View {
                 selectedModel: languageModelStore.selectedModel,
                 onSelectModel: languageModelStore.setModel,
                 onConversationDelete: onConversationDelete,
-                onDeleteDailyConversations: conversationStore.deleteDailyConversations
+                onDeleteDailyConversations: conversationStore.deleteDailyConversations,
+                userInitials: userInitials,
+                copyChat: copyChat
             )
 #else
             SideBarStack(sidebarWidth: 300,showSidebar: $showMenu, sidebar: {
                 SidebarView(
+                    selectedConversation: conversationStore.selectedConversation,
                     conversations: conversationStore.conversations,
                     onConversationTap: onConversationTap,
                     onConversationDelete: onConversationDelete,
@@ -130,7 +167,8 @@ struct Chat: View {
                     conversationState: conversationStore.conversationState,
                     onStopGenerateTap: onStopGenerateTap,
                     reachable: appStore.isReachable,
-                    modelSupportsImages: languageModelStore.supportsImages
+                    modelSupportsImages: languageModelStore.supportsImages,
+                    userInitials: userInitials
                 )
             }
 #endif

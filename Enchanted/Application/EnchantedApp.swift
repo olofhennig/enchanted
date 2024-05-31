@@ -36,6 +36,11 @@ struct EnchantedApp: App {
 #endif
         }
 #if os(macOS)
+        .commands {
+            Menus()
+        }
+#endif
+#if os(macOS)
         Window("Keyboard Shortcuts", id: "keyboard-shortcuts") {
             KeyboardShortcutsDemo()
         }

@@ -8,15 +8,19 @@
 import SwiftUI
 import MarkdownUI
 import Splash
+import ActivityIndicatorView
 
 struct ChatMessageView: View {
     @Environment(\.colorScheme) var colorScheme
     var message: MessageSD
+    var showLoader: Bool = false
+    var userInitials: String
     @Binding var editMessage: MessageSD?
     @State private var mouseHover = false
     
     var roleName: String  { 
-        message.role == "user" ? "AM" : "AI"
+        let userInitialsNotEmpty = userInitials != "" ? userInitials : "AM"
+        return message.role == "user" ? userInitialsNotEmpty.uppercased() : "AI"
     }
     
     var image: PlatformImage? {
@@ -118,19 +122,7 @@ struct ChatMessageView: View {
             .fixedSize(horizontal: false, vertical: true)
         }
         .codeBlock { configuration in
-            ScrollView(.horizontal) {
-                configuration.label
-                    .fixedSize(horizontal: false, vertical: true)
-                    .relativeLineSpacing(.em(0.225))
-                    .markdownTextStyle {
-                        FontFamilyVariant(.monospaced)
-                        FontSize(.em(0.85))
-                    }
-                    .padding(16)
-            }
-            .background(Color.secondaryBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-            .markdownMargin(top: 0, bottom: 16)
+            codeBlock(configuration)
         }
         .listItem { configuration in
             configuration.label
@@ -175,9 +167,9 @@ struct ChatMessageView: View {
     private var codeHighlightColorScheme: Splash.Theme {
         switch colorScheme {
         case .dark:
-          return .wwdc17(withFont: .init(size: 16))
+            return .wwdc17(withFont: .init(size: 16))
         default:
-          return .sunset(withFont: .init(size: 16))
+            return .sunset(withFont: .init(size: 16))
         }
     }
     
@@ -196,6 +188,7 @@ struct ChatMessageView: View {
                             
                         }
                         .frame(width: 24, height: 24)
+                        
                     } else {
                         Image("logo-nobg")
                             .resizable()
@@ -204,11 +197,18 @@ struct ChatMessageView: View {
                     }
                     
                     VStack(alignment: .leading) {
-                        Text(message.role.capitalized)
-                            .font(.system(size: 16))
-                            .fontWeight(.medium)
-                            .padding(.bottom, 2)
-                            .frame(height: 27)
+                        HStack {
+                            Text(message.role.capitalized)
+                                .font(.system(size: 16))
+                                .fontWeight(.medium)
+                                .padding(.bottom, 2)
+                                .frame(height: 27)
+                            
+                            ActivityIndicatorView(isVisible: .constant(true), type: .rotatingDots(count: 5))
+                                .frame(width: 20, height: 20)
+                                .rotationEffect(.degrees(-90))
+                                .showIf(showLoader)
+                        }
                         
                         Markdown(message.content)
                             .textSelection(.enabled)
@@ -258,7 +258,7 @@ struct ChatMessageView: View {
                 .showIf(mouseHover)
                 .showIf(message.role == "user")
             }
-        
+            
 #endif
         }
 #if os(macOS)
@@ -273,7 +273,7 @@ struct ChatMessageView: View {
 
 #Preview {
     Group {
-        ChatMessageView(message: MessageSD.sample[0], editMessage: .constant(nil))
+        ChatMessageView(message: MessageSD.sample[0], userInitials: "AM", editMessage: .constant(nil))
             .previewLayout(.sizeThatFits)
     }
 }
@@ -305,4 +305,48 @@ extension SwiftUI.Color {
     )
     fileprivate static let checkbox = Color(rgba: 0xb9b9_bbff)
     fileprivate static let checkboxBackground = Color(rgba: 0xeeee_efff)
+}
+
+@ViewBuilder
+private func codeBlock(_ configuration: CodeBlockConfiguration) -> some View {
+    var language: String {
+        let language = configuration.language ?? "code"
+        return language != "" ? language : "code"
+    }
+    
+    VStack(spacing: 0) {
+        HStack {
+            Text(language)
+                .font(.system(size: 13, design: .monospaced))
+                .fontWeight(.semibold)
+            Spacer()
+            
+            Button(action: {
+                Clipboard.shared.setString(configuration.content)
+            }) {
+                Image(systemName: "clipboard")
+                    .padding(7)
+            }
+            .buttonStyle(GrowingButton())
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 4)
+        .background(Color.secondaryBackground)
+        
+        Divider()
+        
+        ScrollView(.horizontal) {
+            configuration.label
+                .fixedSize(horizontal: false, vertical: true)
+                .relativeLineSpacing(.em(0.225))
+                .markdownTextStyle {
+                    FontFamilyVariant(.monospaced)
+                    FontSize(.em(0.85))
+                }
+                .padding(16)
+        }
+    }
+    .background(Color.secondaryBackground)
+    .clipShape(RoundedRectangle(cornerRadius: 8))
+    .markdownMargin(top: .zero, bottom: .em(0.8))
 }
